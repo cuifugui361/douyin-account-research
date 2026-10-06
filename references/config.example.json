@@ -1,0 +1,46 @@
+{
+  "workspace_root": "/absolute/path/to/research-workspace",
+  "runtime": {
+    "node": "/absolute/path/to/node",
+    "bb": "/absolute/path/to/bb",
+    "python": "/absolute/path/to/python",
+    "ffmpeg": "/absolute/path/to/ffmpeg",
+    "model": "/absolute/path/to/model"
+  },
+  "browser": {
+    "home": "/absolute/path/to/.bb-browser",
+    "cdp_port": 19825,
+    "daemon_port": 19826
+  },
+  "storage": {
+    "runs": "任务",
+    "cache": "数据/转写"
+  },
+  "feishu": {
+    "url": "",
+    "base": "",
+    "table": "",
+    "view": "",
+    "completed_option": "",
+    "fields": {
+      "url": "",
+      "status": "",
+      "collected_at": "",
+      "nickname": "",
+      "caption": "",
+      "published_at": "",
+      "likes": "",
+      "comments": "",
+      "collects": "",
+      "shares": "",
+      "transcript": "",
+      "review": "",
+      "duration_seconds": "",
+      "hook": "",
+      "raw": ""
+    }
+  },
+  "coze": {
+    "url": ""
+  }
+}

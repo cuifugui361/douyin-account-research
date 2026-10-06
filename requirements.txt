@@ -1,0 +1,4 @@
+mlx-whisper==0.4.3
+mlx==0.29.3
+numpy==2.0.2
+huggingface-hub==1.8.0

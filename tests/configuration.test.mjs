@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {validateConfig,FIELD_ROLES} from '../scripts/configuration.mjs';
+import {FIELD_SCHEMA,bindSchema} from '../scripts/feishu_schema.mjs';
+const config=()=>({workspace_root:'/tmp/research-data',runtime:{node:'node',python:'python3',bb:'/tmp/tools/cli.js',ffmpeg:'ffmpeg',model:'/tmp/models'},feishu:{url:'https://tenant.feishu.cn/base/example?table=table&view=view',base:'example',table:'table',view:'view',completed_option:'done',fields:Object.fromEntries(FIELD_ROLES.map(k=>[k,'field-'+k]))}});
+test('agent setup does not require someone else’s Coze account',()=>assert.doesNotThrow(()=>validateConfig(config(),{requireFeishu:true})));
+test('config and materials stay outside the downloadable skill',()=>{const c=config();c.workspace_root='/tmp/skill/data';assert.throws(()=>validateConfig(c,{codeRoot:'/tmp/skill'}),/outside_skill/);c.workspace_root='/tmp/data';c.storage={runs:'../skill',cache:'cache'};assert.throws(()=>validateConfig(c),/storage_path_unsafe/);});
+test('distinct Feishu roles cannot silently bind to the same field',()=>{const c=config();c.feishu.fields.caption=c.feishu.fields.transcript;assert.throws(()=>validateConfig(c,{requireFeishu:true}),/duplicate_field_mapping/);});
+test('wrong domain or missing binding stops before browser writes',()=>{const c=config();c.feishu.url='https://feishu.cn.evil.invalid/base/test';assert.throws(()=>validateConfig(c,{requireFeishu:true}),/invalid_feishu_url/);c.feishu.url='https://tenant.feishu.cn/base/test';delete c.feishu.fields.raw;assert.throws(()=>validateConfig(c,{requireFeishu:true}),/field_required/);});
+function fields(){return Object.fromEntries(Object.entries(FIELD_SCHEMA).map(([k,s])=>['field-'+k,{id:'field-'+k,name:s.name,type:s.type,...k==='status'?{options:[{id:'done',name:'已完成'}]}:{}}]));}
+test('new-user schema maps all fifteen roles and the completion option',()=>{const b=bindSchema(fields());assert.equal(Object.keys(b.fields).length,15);assert.equal(b.completed_option,'done');});
+test('ambiguity and bad field type do not choose an arbitrary column',()=>{const f=fields();f.other={id:'other',name:'视频链接',type:1};assert.throws(()=>bindSchema(f),/ambiguous:url/);delete f.other;f['field-likes'].type=1;assert.throws(()=>bindSchema(f),/mismatch:likes/);});
+test('explicit user mappings resolve names without accepting wrong types',()=>{const f=fields();f['field-caption'].name='My own label';const b=bindSchema(f,{overrides:{caption:'field-caption'}});assert.equal(b.fields.caption,'field-caption');delete f['field-status'].options;assert.throws(()=>bindSchema(f,{overrides:{caption:'field-caption'}}),/completed_option/);});

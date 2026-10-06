@@ -1,0 +1,4 @@
+interface:
+  display_name: "抖音账号调研"
+  short_description: "采集公开作品、转写口播并生成可追溯的飞书账号调研结果"
+  default_prompt: "使用 $douyin-account-research 调研这个抖音主页，保存作品、口播和互动数据，核验飞书结果并给出带作品来源的分析。"
