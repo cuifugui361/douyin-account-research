@@ -26,7 +26,7 @@ Codex 官方支持[用户目录和链接](https://learn.chatgpt.com/docs/build-s
 
 ## 首次调用由 Agent 完成
 
-1. 以载入的 SKILL.md 所在目录为 Skill 根目录。全部脚本、引用用绝对路径，不能把聊天的工作目录当成 Skill 目录。用本机 Node 执行 `scripts/first_use.mjs`，可加 `--python`、`--bb`、`--ffmpeg`、`--model` 指定已有环境。它只检查，不安装、不写账号。
+1. 以载入的 SKILL.md 所在目录为 Skill 根目录。全部脚本、引用用绝对路径，不能把聊天的工作目录当成 Skill 目录。用本机 Node 执行 `scripts/first_use.mjs`，可加 `--python`、`--bb`、`--ffmpeg`、`--model` 指定已有环境。使用者提供了配置路径时，必须给检查脚本传 `--config /配置绝对路径`，或在这条命令上设置 `RESEARCH_CONFIG`；后续预检和执行入口使用同一份配置。不能只传工具路径，却用默认配置的绑定状态判断另一份配置。它只检查，不安装、不写账号。
 2. 非 Darwin arm64 时停止完整采集，解释当前平台限制。缺依赖时先复用；用户已要求安装/准备环境时，说明实际下载位置和成本后执行所需步骤。只有调用调研、没有安装授权时，先说明缺失工具与补齐方案。所有依赖位于该 Skill 的 node_modules、.venv 或独立工具目录，不修改其他项目。
 3. bb-browser 缺失：在 Skill 根目录运行 `npm ci --ignore-scripts`。Python 3.11 可用且缺 ASR 模块：在 Skill 根目录创建 `.venv`，用其中的 Python 安装 requirements.txt。FFmpeg、Node/Python 不可用时按 README 的上游安装方式准备；不默默改变系统工具版本。模型缺失时用 download_model.py 下载到 Skill 外，约1.5GiB；不把已有模型复制进发布目录。
 4. 依赖准备后调用 configure.mjs，并显式传入检查获得的工具/模型路径。只生成使用者自己的配置；不导入作者个人文件。再读[飞书绑定说明](setup.md)，引导本人登录真实 Chrome 中的抖音、飞书并选定允许写入的表格。表格必须符合15字段约定；缺字段时列出具体差异。用户要求准备新表时可协助创建，其真实建表路径必须另行核验，不能宣称脚本会自动建表。
