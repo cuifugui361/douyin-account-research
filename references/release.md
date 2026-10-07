@@ -13,10 +13,13 @@ git status --short
 确认审计通过并提交代码。仅将源码仓库上传到自己的GitHub公共仓库；不要上传运行工作台整个目录。压缩包从已提交的Git树制作：
 
 ```bash
-python3 scripts/package_release.py --output /仓库外/douyin-account-research-v0.1.0.zip
+python3 scripts/package_release.py --output /仓库外/douyin-account-research-v0.1.1.zip
+python3 scripts/package_release.py --layout skill --output /仓库外/douyin-account-research-v0.1.1-skill.zip
 ```
 
 它会拒绝未提交的变更、私人文件、模型/媒体，以及仓库内输出路径。命令输出ZIP的SHA-256，校验解压后的README、Skill及引用链接存在。新机器或临时目录再运行一次配置流程及合成测试；已有账号的旧测试只作兼容背景。
+
+source 包含一个 douyin-account-research 外层文件夹，适合解压保留源码；skill 布局把 SKILL.md 放在 ZIP 根层，供宿主技能导入。两种包都包含完整源码，不包括运行资料。不能仅凭根层结构说导入已成功，必须在目标宿主中观察导入/识别结果。
 
 GitHub新仓库可用上传文件界面上传ZIP内的源码，或设置remote后`git push -u origin main`。若仓库已有提交，不覆盖历史或强制推送；先检查并使用普通分支/PR流程。CI只跑合成测试，不上传或访问账号资料。
 

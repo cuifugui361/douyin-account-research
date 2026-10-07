@@ -5,18 +5,19 @@ description: 输入抖音主页链接，采集公开作品与互动快照、转�
 
 # 抖音账号调研
 
-支持 Apple Silicon Mac 本机执行路径。图文和文章只采集发布文案与互动，未接入图文 OCR 或文章正文提取；不能宣称所有作品都取得正文或口播。视频自动转写与模型分析都需要质量复核。
+用于 Codex、Claude Code 或 WorkBuddy 中具有本机文件和命令执行能力的 Agent；完整链路支持 Apple Silicon Mac。图文和文章只采集发布文案与互动，未接入图文 OCR 或文章正文提取；不能宣称所有作品都取得正文或口播。视频自动转写与模型分析都需要质量复核。
 
 ## 先识别任务和环境
 
-- 配置默认在 `~/.config/douyin-account-research/config.json`，也可通过 `RESEARCH_CONFIG` 指定。首次使用或缺配置时读 [安装和绑定](references/setup.md)，用 `configure.mjs` 定位已有工具和独立数据目录，再只读绑定用户自己的飞书视图。安装命令在仓库 README。配置与数据不存入 Skill 包。运行 `scripts/preflight.py` 检查本机能力；缺能力时先比较复用与补齐方案，不自动安装或索取聊天中的凭证。
-- 默认真实 Chrome 与 bb-browser；MCP 未连接时启动已安装的 daemon 并重试。不得替换为无登录的模拟页面冒充采集，不解决或绕过验证码。
+- Skill 根目录取载入的本文件所在目录，不取当前聊天的工作目录。脚本和引用使用绝对路径；在其他目录调用也必须能找到同一份脚本。首次使用先读 [三端首次使用](references/first-use.md)，用本机 Node 运行 `scripts/first_use.mjs`，检查平台、依赖、个人配置和绑定状态。缺依赖时按使用者安装授权复用或补齐，不能让使用者猜脚本路径或复制作者配置。
+- 配置默认在 `~/.config/douyin-account-research/config.json`，也可通过 `RESEARCH_CONFIG` 指定。用 `configure.mjs` 定位已有工具和独立数据目录，再按 [安装和绑定](references/setup.md) 只读绑定用户自己的飞书视图。配置与数据不存入 Skill 包。运行配置中 Python 的 `scripts/preflight.py` 检查本机能力；不索取聊天中的凭证。
+- 默认真实 Chrome 与 bb-browser。脚本通过 CLI 调用浏览器，三种宿主都不强制安装 bb-browser MCP；有 MCP 可以使用，没 MCP 用已安装 CLI。连接失败启动已安装 daemon 并重试，保留具体错误。不得替换为无登录的模拟页面冒充采集，不解决或绕过验证码。
 - 按用户本次授权的目标写入飞书，已有授权不重复询问。新增 OAuth 权限、其他账号动作或新安装不由 Skill 自动授权。目标与字段不匹配立即停止。
 - 有完整材料时可直接分析；新账号采集；重复账号更新互动并复用有效转写缓存；中断任务恢复检查点。运行数据按账号 ID 与任务 ID 隔离。
 
 ## 执行
 
-`run_account_v2.mjs` 是执行入口。用配置中的 Node 路径运行，参数为主页 URL；在 Codex 中执行时加 `--analysis agent`。复用任务可加 `--resume` 和已有任务目录；新快照可加 `--new`。
+`run_account_v2.mjs` 是执行入口。用配置中的 Node 路径和脚本绝对路径运行，参数为主页 URL；三种宿主都加 `--analysis agent`，由当前宿主接着分析。复用任务可加 `--resume` 和已有任务目录；新快照可加 `--new`。
 
 脚本以 `data_ready` 返回时只说明采集、转写、飞书刷新核验和分析证据完成，不代表分析已经完成。读取任务目录中的 `任务状态.json`、`完整调研.json`、`统计.json` 和 `分析证据.json`，由当前 Agent 接着分析。默认是当前 Agent 分析。可选扣子模式使用用户自己的已登录智能体，只生成待审阅草稿，不依赖作者账号。
 

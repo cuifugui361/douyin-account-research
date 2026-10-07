@@ -1,6 +1,6 @@
 # 抖音账号调研 Skill
 
-给 Codex 等本机 Agent 一个抖音主页链接，取得公开作品的发布文案、发布时间、赞评藏转，离线转写视频口播，保存到你自己的飞书多维表格，再由 Agent 基于作品来源分析账号。
+给 Codex、Claude Code 或 WorkBuddy 本机 Agent 一个抖音主页链接，取得公开作品的发布文案、发布时间、赞评藏转，离线转写视频口播，保存到你自己的飞书多维表格，再由当前 Agent 基于作品来源分析账号。
 
 **当前支持：Apple Silicon Mac + Node.js 20/22 + Python + 真实 Chrome + bb-browser。** 需要浏览器登录抖音和飞书。首次配置后可只提供主页链接；验证码需要自己完成。Windows、Intel Mac、纯云无人值守尚未验证。
 
@@ -16,13 +16,29 @@
 
 不需要复制浏览器Cookie、API密钥或作者的私人配置。软件与模型使用各自上游许可；本仓库代码采用 [MIT](LICENSE)。
 
+推荐把仓库网址或下载的完整文件夹交给自己的 Agent，并说：
+
+> 请把这个 Skill 安装到我正在使用的 Agent，完成首次环境检查和准备，绑定我自己的飞书。之后让我只输入抖音主页链接就能调研。
+
+Agent 按 [三种 Agent 的首次使用](references/first-use.md) 处理目录、依赖和配置。首次仍需本人登录抖音、飞书并选择目标表格；缺少转写模型时会说明约1.5GiB的下载。已有工具和模型可复用。Skill 导入成功不代表依赖或数据链路已经就绪。
+
+| 使用工具 | Skill 安装入口 | 触发 |
+| --- | --- | --- |
+| Codex | `~/.agents/skills/douyin-account-research/` | `$douyin-account-research` |
+| Claude Code | `~/.claude/skills/douyin-account-research/` | `/douyin-account-research` |
+| WorkBuddy Desktop | `~/.workbuddy/skills/douyin-account-research/` | 技能列表选择或直接要求使用“抖音账号调研” |
+
+三端使用相同源码。`agents/openai.yaml` 只为 Codex 显示名称；CLI 脚本不要求宿主提供专属 MCP 工具。下列手工命令供 Agent 执行和故障排查：
+
 1. 准备 Node.js、Python 3.11 和 FFmpeg（已有环境可复用）。MLX Whisper 的上游安装见 [官方说明](https://github.com/ml-explore/mlx-examples/tree/main/whisper)，浏览器工具见 [bb-browser](https://github.com/epiral/bb-browser)。
-2. 下载本仓库到 Codex 的 Skill 目录。下面命令只适用于目标目录尚不存在的首次安装；更新时先保留本地修改，再用 `git pull --ff-only`。
+2. 下载本仓库到固定源码位置，再链接到本机已有 Agent。下面命令只适用于目标目录尚不存在的首次安装；更新时先保留本地修改，再用 `git pull --ff-only`。安装器不覆盖已有目录或旧 Codex 入口；报告冲突后保留原件。
 
 ```bash
-mkdir -p "$HOME/.codex/skills"
-git clone https://github.com/cuifugui361/douyin-account-research.git "$HOME/.codex/skills/douyin-account-research"
-cd "$HOME/.codex/skills/douyin-account-research"
+mkdir -p "$HOME/.local/share/douyin-account-research"
+git clone https://github.com/cuifugui361/douyin-account-research.git "$HOME/.local/share/douyin-account-research/skill"
+cd "$HOME/.local/share/douyin-account-research/skill"
+node scripts/install_macos.mjs
+node scripts/first_use.mjs
 npm ci --ignore-scripts
 python3.11 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
@@ -65,9 +81,11 @@ node scripts/bind_feishu.mjs TAB --write
 
 ## 在 Agent 中使用
 
-安装后开一个新 Codex 聊天使 Skill 被发现，输入：
+安装后开新会话或刷新技能列表，输入：
 
-> 使用 $douyin-account-research 调研这个抖音主页：这里粘贴主页分享链接。写入我已绑定的飞书，分析选题、开头和正文结构，说明证据与限制。
+> 使用“抖音账号调研”技能调研这个主页：这里粘贴主页分享链接。写入我已绑定的飞书，分析选题、开头和正文结构，说明证据与限制。
+
+Codex 可用 `$douyin-account-research`，Claude Code 可用 `/douyin-account-research`；WorkBuddy 在本地技能中选取。首次调用先做环境检查和自己的目标绑定，再处理采集。脚本路径基于 SKILL.md 所在目录，和当前聊天的工作目录无关。
 
 或者在仓库目录执行数据链路：
 
@@ -98,4 +116,4 @@ CI只用合成数据检查配置隔离、字段绑定、统计、重复输入、
 
 提Issue时提供脱敏错误代码、工具版本和所处阶段，不附Cookie、配置、临时媒体地址、原视频或完整账号材料。代码贡献先运行上述检查；浏览器适配变更须另外完成授权账号的只读采集或专用测试表集成验证。
 
-卸载：移除 Skill 目录及其 `node_modules/.venv` 即可。个人配置与研究资料在目录外，按需要单独备份或移除；不修改浏览器登录状态。发布包制作见 [发布步骤](references/release.md)。
+卸载：在源码目录执行 `node scripts/install_macos.mjs unlink` 移除指向该源码的安装链接，再按需要移除源码和其中的 `node_modules/.venv`。通过宿主导入的实体目录由宿主卸载，安装器不会删除。个人配置与研究资料在目录外，按需要单独备份或移除；不修改浏览器登录状态。发布包制作见 [发布步骤](references/release.md)。
